@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#8ed8e8" />
+  <title>Blocklands — A Tiny Voxel World</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2377ba7a' d='M2 2h13v13H2z'/%3E%3Cpath fill='%23b4d681' d='M17 2h13v13H17z'/%3E%3Cpath fill='%2385c894' d='M2 17h13v13H2z'/%3E%3Cpath fill='%23e8c978' d='M17 17h13v13H17z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="game-shell">
+    <canvas id="game-canvas" aria-label="3D voxel world"></canvas>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Blocklands home">
+        <span class="brand-mark"><span></span><span></span><span></span><span></span></span>
+        <span>BLOCK<span class="brand-light">LANDS</span></span>
+      </a>
+      <div class="world-label"><span class="live-dot"></span><span>THE OVERWORLD</span><span class="divider">/</span><span id="coords">0, 0</span></div>
+      <button class="icon-button sound-toggle" id="sound-toggle" title="Toggle ambience" aria-label="Toggle ambience"><span class="sound-icon">♪</span></button>
+    </header>
+
+    <section class="left-panel glass">
+      <div class="panel-kicker">YOUR ADVENTURE</div>
+      <h1>Make this<br><em>world yours.</em></h1>
+      <p>Wander, gather, and build something wonderful.</p>
+      <div class="world-stats">
+        <div><span class="stat-icon sun-icon">☀</span><span><b>DAYTIME</b><small>Clear skies</small></span></div>
+        <div><span class="stat-icon leaf-icon">✦</span><span><b id="blocks-count">0 blocks</b><small>in your world</small></span></div>
+      </div>
+      <button class="primary-button" id="play-button"><span>Enter the world</span><span class="button-arrow">↗</span></button>
+      <div class="panel-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>to move</span></div>
+    </section>
+
+    <div class="right-rail">
+      <div class="weather-card glass"><span class="weather-sun">☀</span><span><b>18°</b><small>Perfect day</small></span></div>
+      <button class="rail-button glass" id="map-button" title="Reset view"><span>⌖</span></button>
+      <button class="rail-button glass" id="help-button" title="Controls"><span>?</span></button>
+    </div>
+
+    <div id="crosshair"><i></i><i></i></div>
+    <div class="target-label" id="target-label"></div>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <section class="bottom-hud" id="bottom-hud">
+      <div class="quick-hint"><kbd>W A S D</kbd> MOVE <span>·</span> <kbd>SPACE</kbd> JUMP <span>·</span> <kbd>CLICK</kbd> MINE <span>·</span> <kbd>RIGHT CLICK</kbd> PLACE</div>
+      <div class="hotbar-wrap">
+        <div class="tool-slot" title="Your hand"><span>✦</span><small>HAND</small></div>
+        <div class="hotbar" id="hotbar"></div>
+        <button class="inventory-button" id="inventory-button"><span>▦</span><small>INVENTORY <kbd>E</kbd></small></button>
+      </div>
+    </section>
+
+    <div class="overlay hidden" id="start-overlay">
+      <div class="start-card glass">
+        <div class="start-logo"><span class="brand-mark big"><span></span><span></span><span></span><span></span></span></div>
+        <div class="panel-kicker">A LITTLE WORLD, JUST FOR YOU</div>
+        <h2>Ready to<br><em>make your mark?</em></h2>
+        <p>Step into a sunny block-built world.<br>Explore at your own pace.</p>
+        <button class="primary-button" id="start-button"><span>Start exploring</span><span class="button-arrow">↗</span></button>
+        <div class="start-controls"><span>WASD <small>MOVE</small></span><span> MOUSE <small>LOOK</small></span><span>CLICK <small>BUILD</small></span></div>
+        <button class="back-link" id="back-button">Maybe later</button>
+      </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="help-modal">
+      <div class="help-card glass">
+        <button class="close-button" id="close-help" aria-label="Close">×</button>
+        <div class="panel-kicker">QUICK FIELD GUIDE</div><h2>How to play</h2>
+        <div class="control-list"><div><kbd>W A S D</kbd><span>Move around</span></div><div><kbd>MOUSE</kbd><span>Look around</span></div><div><kbd>SPACE</kbd><span>Jump</span></div><div><kbd>LEFT CLICK</kbd><span>Mine a block</span></div><div><kbd>RIGHT CLICK</kbd><span>Place a block</span></div><div><kbd>1 — 6</kbd><span>Choose a block</span></div><div><kbd>E</kbd><span>Show / hide inventory</span></div><div><kbd>ESC</kbd><span>Release your cursor</span></div></div>
+        <p class="help-foot">Every block you mine is yours to place. Find a nice spot and make it your own.</p>
+      </div>
+    </div>
+
+    <div class="mobile-controls" id="mobile-controls">
+      <div class="move-pad"><button data-move="forward">▲</button><div><button data-move="left">◀</button><button data-move="back">▼</button><button data-move="right">▶</button></div></div>
+      <div class="action-pad"><button id="mobile-jump">JUMP</button><button id="mobile-place">PLACE</button><button id="mobile-mine">MINE</button></div>
+      <div class="look-zone" id="look-zone"></div>
+    </div>
+
+    <div class="corner-note"><span>✦</span> A small world by Blocklands</div>
+  </main>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
